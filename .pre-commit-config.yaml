@@ -1,0 +1,17 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.1.0
+  hooks:
+  - id: check-yaml
+  - id: trailing-whitespace
+    exclude: .md|app/data/|app/artifacts/|app/notebooks/
+- repo: https://github.com/psf/black
+  rev: 22.3.0
+  hooks:
+  - id: black
+    language_version: python3.9
+- repo: https://gitlab.com/pycqa/flake8
+  rev: 3.9.2
+  hooks:
+  - id: flake8
+    exclude: app/notebooks/|app/data/|app/artifacts/

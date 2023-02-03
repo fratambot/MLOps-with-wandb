@@ -1,0 +1,14 @@
+# MacOS
+Icon?
+.DS_store
+# python
+__pycache__
+.ipynb_checkpoints
+# VS Code
+*.code-workspace
+# local folders
+local_datasets/
+wandb/
+logs/
+# security
+.env
