@@ -6,9 +6,8 @@ __pycache__
 .ipynb_checkpoints
 # VS Code
 *.code-workspace
-# local folders
-local_datasets/
+# folders and folder content
+app/artifacts/data/*
 wandb/
-logs/
 # security
 .env
