@@ -91,7 +91,6 @@ def data_preparation_pipeline(args):
             run.log_artifact(split_data_artifact)
 
     else:
-        print("Retrieve datasets from wandb")
         print("↑↑↑ Loading datasets from wandb...")
         with wandb.init(project=PROJECT_NAME, job_type="load") as run:
             split_data_filename = CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
@@ -183,7 +182,7 @@ class DataSets:
 if __name__ == "__main__":
     # python app/pipelines/data_prep.py --build_datasets
     # Parse args
-    docstring = """When running this script as main you can specify the filepath for the raw data to be prepared """  # noqa: E501
+    docstring = """By default the data is pulled from wandb. You can build it if you want. See the help for this script """  # noqa: E501
     parser = argparse.ArgumentParser(
         description=docstring,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

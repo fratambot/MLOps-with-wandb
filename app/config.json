@@ -10,6 +10,16 @@
           20.0,
           10.0
         ]
+      },
+      "models": {
+        "filename": "CNN_model_baseline",
+        "root_dir": "/Users/francesco/REPOS/MNIST-MLOps/app/artifacts/models",
+        "filepath": "/Users/francesco/REPOS/MNIST-MLOps/app/artifacts/models/CNN_model_baseline.h5",
+        "train_config": {
+          "epochs": 10,
+          "batch_size": 128,
+          "lr": 0.01
+        }
       }
     }
   }
