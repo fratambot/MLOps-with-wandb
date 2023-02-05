@@ -8,6 +8,7 @@ __pycache__
 *.code-workspace
 # folders and folder content
 app/artifacts/data/*
+app/artifacts/models/*
 wandb/
 # security
 .env
