@@ -53,7 +53,10 @@ def train(args):
             datasets["y_test"],
         )
 
-    train_config = {"epochs": args.train_epochs, "batch_size": 128, "lr": 0.01}
+        print("training examples: ", len(datasets.X_train))
+        print("validation examples: ", len(datasets.X_val))
+
+    train_config = {"epochs": args.train_epochs, "batch_size": 64, "lr": 0.01}
     with wandb.init(
         project=PROJECT_NAME, job_type="training", config=train_config
     ) as run:
