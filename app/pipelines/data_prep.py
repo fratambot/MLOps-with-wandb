@@ -6,7 +6,7 @@ import os
 import sys
 import wandb
 
-from dataclasses import dataclass, is_dataclass
+from dataclasses import dataclass
 from dotenv import load_dotenv
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.datasets import mnist
@@ -28,95 +28,67 @@ def data_preparation_pipeline(args):
     wandb.login()
     global PROJECT_NAME
     PROJECT_NAME = "MNIST"
-    if args.build_datasets:
-        with wandb.init(project=PROJECT_NAME, job_type="upload") as run:
-            CONFIG[PROJECT_NAME] = {
-                "artifacts": {"split-data": {"filename": "split-data"}}
-            }
-            split_data_filename = CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
-                "filename"
-            ]
-            split_data_root_dir = os.path.join(base_path, "artifacts/data")
-            CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
-                "root_dir"
-            ] = split_data_root_dir
-            split_data_filepath = os.path.join(
-                split_data_root_dir, split_data_filename + ".npz"
-            )
-            CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
-                "filepath"
-            ] = split_data_filepath
-            print("↑↑↑ Pulling MNIST dataset from keras...")
-            (X_tr, y_tr), (X_te, y_te) = mnist.load_data()
-            # We rather want to split into train / val / test
-            X = np.concatenate([X_tr, X_te])
-            y = np.concatenate([y_tr, y_te])
-
-            datasets = split_data(X, y, args.train_val_test_size)
-            print("Normalizing and reshaping...")
-            datasets.X_train = (datasets.X_train / 255) - 0.5
-            datasets.X_train = np.expand_dims(datasets.X_train, axis=3)
-            datasets.X_val = (datasets.X_val / 255) - 0.5
-            datasets.X_val = np.expand_dims(datasets.X_val, axis=3)
-            datasets.X_test = (datasets.X_test / 255) - 0.5
-            datasets.X_test = np.expand_dims(datasets.X_test, axis=3)
-            print("↓↓↓ Saving split data as artifact...")
-            np.savez_compressed(
-                os.path.join(split_data_filepath),
-                X_train=datasets.X_train,
-                y_train=datasets.y_train,
-                X_val=datasets.X_val,
-                y_val=datasets.y_val,
-                X_test=datasets.X_test,
-                y_test=datasets.y_test,
-            )
-            split_data_artifact = wandb.Artifact(
-                split_data_filename,
-                type="dataset",
-                description="artifact consisting of train / val / test datasets. It comes with a table on targets to check class stratification in wandb",  # noqa: E501
-                metadata={
-                    "X_train shape": datasets.X_train.shape,
-                    "y_train shape": datasets.y_train.shape,
-                    "X_val shape": datasets.X_val.shape,
-                    "y_val shape": datasets.y_val.shape,
-                    "X_test shape": datasets.X_test.shape,
-                    "y_test shape": datasets.y_test.shape,
-                },
-            )
-            split_data_artifact.add_file(local_path=split_data_filepath)
-            # create wandb table on targets
-            labels_df = build_labels_df(datasets)
-            table = wandb.Table(dataframe=labels_df)
-            split_data_artifact.add(table, "split_labels")
-            run.log_artifact(split_data_artifact)
-
-    else:
-        print("↑↑↑ Loading datasets from wandb...")
-        with wandb.init(project=PROJECT_NAME, job_type="load") as run:
-            split_data_filename = CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
-                "filename"
-            ]
-            split_data_root_dir = CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
-                "root_dir"
-            ]
-            split_data_filepath = CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
-                "filepath"
-            ]
-            run.use_artifact(split_data_filename + ":latest").download(
-                split_data_root_dir
-            )
-            datasets = np.load(split_data_filepath, allow_pickle=True)
-
-    if not is_dataclass(datasets):
-        # Unzip datasets and rebuild dataclass
-        datasets = DataSets(
-            datasets["X_train"],
-            datasets["y_train"],
-            datasets["X_val"],
-            datasets["y_val"],
-            datasets["X_test"],
-            datasets["y_test"],
+    with wandb.init(project=PROJECT_NAME, job_type="upload") as run:
+        CONFIG[PROJECT_NAME] = {"artifacts": {"split-data": {"filename": "split-data"}}}
+        split_data_filename = CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
+            "filename"
+        ]
+        split_data_root_dir = os.path.join(base_path, "artifacts/data")
+        CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
+            "root_dir"
+        ] = split_data_root_dir
+        split_data_filepath = os.path.join(
+            split_data_root_dir, split_data_filename + ".npz"
         )
+        CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
+            "filepath"
+        ] = split_data_filepath
+        print("↑↑↑ Pulling MNIST dataset from keras...")
+        (X_tr, y_tr), (X_te, y_te) = mnist.load_data()
+        X = np.concatenate([X_tr, X_te])
+        y = np.concatenate([y_tr, y_te])
+        # Use only a fraction of the dataset
+        (X, y) = sample(X, y, args.fraction)
+        print("X sample = ", X.shape)
+        print("y sample = ", y.shape)
+        # We rather want to split into train / val / test
+        datasets = split_data(X, y, args.train_val_test_size)
+        print("Normalizing and reshaping...")
+        datasets.X_train = (datasets.X_train / 255) - 0.5
+        datasets.X_train = np.expand_dims(datasets.X_train, axis=3)
+        datasets.X_val = (datasets.X_val / 255) - 0.5
+        datasets.X_val = np.expand_dims(datasets.X_val, axis=3)
+        datasets.X_test = (datasets.X_test / 255) - 0.5
+        datasets.X_test = np.expand_dims(datasets.X_test, axis=3)
+        print("↓↓↓ Saving split data as artifact...")
+        np.savez_compressed(
+            os.path.join(split_data_filepath),
+            X_train=datasets.X_train,
+            y_train=datasets.y_train,
+            X_val=datasets.X_val,
+            y_val=datasets.y_val,
+            X_test=datasets.X_test,
+            y_test=datasets.y_test,
+        )
+        split_data_artifact = wandb.Artifact(
+            split_data_filename,
+            type="dataset",
+            description="artifact consisting of train / val / test datasets. It comes with a table on targets to check class stratification in wandb",  # noqa: E501
+            metadata={
+                "X_train shape": datasets.X_train.shape,
+                "y_train shape": datasets.y_train.shape,
+                "X_val shape": datasets.X_val.shape,
+                "y_val shape": datasets.y_val.shape,
+                "X_test shape": datasets.X_test.shape,
+                "y_test shape": datasets.y_test.shape,
+            },
+        )
+        split_data_artifact.add_file(local_path=split_data_filepath)
+        # create wandb table on targets
+        labels_df = build_labels_df(datasets)
+        table = wandb.Table(dataframe=labels_df)
+        split_data_artifact.add(table, "split_labels")
+        run.log_artifact(split_data_artifact)
 
     print("training examples: ", len(datasets.X_train))
     print("validation examples: ", len(datasets.X_val))
@@ -127,6 +99,15 @@ def data_preparation_pipeline(args):
         json.dump(CONFIG, f, indent=2)
 
     return datasets
+
+
+def sample(X, y, fraction):
+    CONFIG[PROJECT_NAME]["artifacts"]["split-data"]["sample_fraction"] = fraction
+    X_sample, _, y_sample, _ = train_test_split(
+        X, y, shuffle=True, train_size=fraction / 100.0, stratify=y
+    )
+
+    return X_sample, y_sample
 
 
 def split_data(X, y, train_val_test_size):
@@ -180,16 +161,14 @@ class DataSets:
 
 
 if __name__ == "__main__":
-    # python app/pipelines/data_prep.py --build_datasets
+    # python app/pipelines/data_prep.py
     # Parse args
-    docstring = """By default the data is pulled from wandb. You can build it if you want. See the help for this script """  # noqa: E501
+    docstring = """This pipeline will build a train / val / test dataset from the keras MNIST dataset """  # noqa: E501
     parser = argparse.ArgumentParser(
         description=docstring,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument(
-        "--build_datasets", default=False, action=argparse.BooleanOptionalAction
-    )
+    parser.add_argument("--fraction", default=15, type=int)
     parser.add_argument("--train_val_test_size", nargs="+", default="70 20 10")
     args = parser.parse_args()
 
