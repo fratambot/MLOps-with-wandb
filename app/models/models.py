@@ -11,7 +11,6 @@ sys.path.insert(0, base_path)
 
 
 def CNN_model(config):
-    print("config in model = ", config)
     model = tf.keras.Sequential()
     model.add(tfl.Input(shape=(28, 28, 1), name="input_layer"))
     model.add(

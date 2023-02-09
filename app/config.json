@@ -1,2 +1,22 @@
 {
+  "MNIST": {
+    "artifacts": {
+      "split-data": {
+        "filename": "split-data",
+        "root_dir": "/Users/francesco/REPOS/MNIST-MLOps/app/artifacts/data",
+        "filepath": "/Users/francesco/REPOS/MNIST-MLOps/app/artifacts/data/split-data.npz",
+        "sample_fraction": 15,
+        "train_val_test_size": [
+          70.0,
+          20.0,
+          10.0
+        ]
+      },
+      "models": {
+        "filename": "CNN_model",
+        "root_dir": "/Users/francesco/REPOS/MNIST-MLOps/app/artifacts/models",
+        "filepath": "/Users/francesco/REPOS/MNIST-MLOps/app/artifacts/models/CNN_model.h5"
+      }
+    }
+  }
 }

@@ -34,7 +34,7 @@ default_config = SimpleNamespace(
     dense=128,
     dropout_3=0.4,
     tune=False,
-    max_sweep=20,
+    max_sweep=30,
 )
 
 
@@ -169,7 +169,6 @@ def train(config=None):
 
 
 def tune(config):
-    print("config in tune = ", config)
     wandb.login()
     global PROJECT_NAME
     PROJECT_NAME = "MNIST"
