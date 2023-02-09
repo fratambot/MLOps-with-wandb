@@ -6,7 +6,6 @@ import os
 import sys
 import wandb
 
-from dataclasses import dataclass
 from dotenv import load_dotenv
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.datasets import mnist
@@ -20,27 +19,45 @@ base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # cannot import from modules at the same level
 sys.path.insert(0, base_path)
 
+# local imports
+from utils.dataclass import DataSets  # noqa: E402
+
+
+def parse_args():
+    docstring = """This pipeline will build a train / val / test dataset from the keras MNIST dataset """  # noqa: E501
+    parser = argparse.ArgumentParser(
+        description=docstring,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("--fraction", default=15, type=int)
+    parser.add_argument("--train_val_test_size", nargs="+", default="70 20 10")
+    args = parser.parse_args()
+
+    return args
+
 
 def data_preparation_pipeline(args):
     config_filepath = os.path.join(base_path, "config.json")
-    global CONFIG
-    CONFIG = json.load(open(config_filepath))
+    global LOCAL_CONFIG
+    LOCAL_CONFIG = json.load(open(config_filepath))
     wandb.login()
     global PROJECT_NAME
     PROJECT_NAME = "MNIST"
     with wandb.init(project=PROJECT_NAME, job_type="upload") as run:
-        CONFIG[PROJECT_NAME] = {"artifacts": {"split-data": {"filename": "split-data"}}}
-        split_data_filename = CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
+        LOCAL_CONFIG[PROJECT_NAME] = {
+            "artifacts": {"split-data": {"filename": "split-data"}}
+        }
+        split_data_filename = LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
             "filename"
         ]
         split_data_root_dir = os.path.join(base_path, "artifacts/data")
-        CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
+        LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
             "root_dir"
         ] = split_data_root_dir
         split_data_filepath = os.path.join(
             split_data_root_dir, split_data_filename + ".npz"
         )
-        CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
+        LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
             "filepath"
         ] = split_data_filepath
         print("↑↑↑ Pulling MNIST dataset from keras...")
@@ -96,13 +113,13 @@ def data_preparation_pipeline(args):
 
     # save updates to CONFIG file
     with open(config_filepath, "w") as f:
-        json.dump(CONFIG, f, indent=2)
+        json.dump(LOCAL_CONFIG, f, indent=2)
 
     return datasets
 
 
 def sample(X, y, fraction):
-    CONFIG[PROJECT_NAME]["artifacts"]["split-data"]["sample_fraction"] = fraction
+    LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["split-data"]["sample_fraction"] = fraction
     X_sample, _, y_sample, _ = train_test_split(
         X, y, shuffle=True, train_size=fraction / 100.0, stratify=y
     )
@@ -113,7 +130,9 @@ def sample(X, y, fraction):
 def split_data(X, y, train_val_test_size):
     split_list = list(map(float, train_val_test_size.split(" ")))
     assert len(split_list) == 3
-    CONFIG[PROJECT_NAME]["artifacts"]["split-data"]["train_val_test_size"] = split_list
+    LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
+        "train_val_test_size"
+    ] = split_list
     split_list = np.divide(split_list, 100.0)
     X_trainval, X_test, y_trainval, y_test = train_test_split(
         X,
@@ -150,27 +169,8 @@ def build_labels_df(datasets):
     return labels_df
 
 
-@dataclass
-class DataSets:
-    X_train: float
-    y_train: float
-    X_val: float
-    y_val: float
-    X_test: float
-    y_test: float
-
-
 if __name__ == "__main__":
     # python app/pipelines/data_prep.py
-    # Parse args
-    docstring = """This pipeline will build a train / val / test dataset from the keras MNIST dataset """  # noqa: E501
-    parser = argparse.ArgumentParser(
-        description=docstring,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-    parser.add_argument("--fraction", default=15, type=int)
-    parser.add_argument("--train_val_test_size", nargs="+", default="70 20 10")
-    args = parser.parse_args()
 
     wandb_key = os.environ.get("WANDB_API_KEY")
     if wandb_key is None:
@@ -179,5 +179,6 @@ if __name__ == "__main__":
         )
     else:
         print("=== Data preparation pipeline ===")
+        args = parse_args()
         data_preparation_pipeline(args)
         print("=== Finished ===")
