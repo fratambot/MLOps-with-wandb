@@ -173,7 +173,7 @@ def tune(config):
     global PROJECT_NAME
     PROJECT_NAME = "MNIST"
     print("↑↑↑ Running sweeps in wandb...")
-    with open(os.path.join(base_path, "artifacts/models", "sweep.yaml"), "r") as f:
+    with open(os.path.join(base_path, "pipelines", "sweep_config.yaml"), "r") as f:
         sweep_config = yaml.safe_load(f)
     sweep_id = wandb.sweep(sweep=sweep_config, project=PROJECT_NAME)
     train_with_config = partial(train, config=config)

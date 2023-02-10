@@ -1,0 +1,21 @@
+method: bayes
+project: MNIST
+metric:
+  name: val_loss
+  goal: minimize
+
+parameters:
+  lr:
+    distribution: log_uniform_values
+    min: 1e-4
+    max: 1e-2
+  batch_size:
+    values: [64, 128]
+  dropout_1:
+    values: [0.3, 0.4, 0.5]
+  dropout_2:
+    values: [0.3, 0.4, 0.5]
+  dropout_3:
+    values: [0.3, 0.4, 0.5]
+  dense:
+    values: [64, 128]
