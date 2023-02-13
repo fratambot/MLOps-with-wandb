@@ -8,7 +8,7 @@ import wandb
 
 from dotenv import load_dotenv
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.datasets import mnist
+from tensorflow import keras
 
 # load env variables
 load_dotenv()
@@ -20,7 +20,7 @@ base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, base_path)
 
 # local imports
-from utils.dataclass import DataSets  # noqa: E402
+from utils.data import DataSets  # noqa: E402
 
 
 def parse_args():
@@ -42,8 +42,8 @@ def data_preparation_pipeline(args):
     LOCAL_CONFIG = json.load(open(config_filepath))
     wandb.login()
     global PROJECT_NAME
-    PROJECT_NAME = "MNIST"
-    with wandb.init(project=PROJECT_NAME, job_type="upload") as run:
+    PROJECT_NAME = os.environ.get("WANDB_PROJECT")
+    with wandb.init(project=PROJECT_NAME, job_type="data-split") as run:
         LOCAL_CONFIG[PROJECT_NAME] = {
             "artifacts": {"split-data": {"filename": "split-data"}}
         }
@@ -61,7 +61,7 @@ def data_preparation_pipeline(args):
             "filepath"
         ] = split_data_filepath
         print("↑↑↑ Pulling MNIST dataset from keras...")
-        (X_tr, y_tr), (X_te, y_te) = mnist.load_data()
+        (X_tr, y_tr), (X_te, y_te) = keras.datasets.mnist.load_data()
         X = np.concatenate([X_tr, X_te])
         y = np.concatenate([y_tr, y_te])
         # Use only a fraction of the dataset

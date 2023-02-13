@@ -30,8 +30,8 @@ def CNN_model(config):
 
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=config.lr),
-        loss="categorical_crossentropy",
-        metrics=[tf.keras.metrics.CategoricalAccuracy()],
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+        metrics=[tf.keras.metrics.SparseCategoricalAccuracy()],
     )
 
     print(model.summary())
