@@ -9,6 +9,7 @@ __pycache__
 # folders and folder content
 app/artifacts/data/*
 app/artifacts/models/*
+app/artifacts/figures/*
 wandb/
 # security
 .env
