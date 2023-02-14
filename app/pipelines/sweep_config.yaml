@@ -1,5 +1,5 @@
 method: bayes
-project: MNIST
+project: ${WANDB_PROJECT}
 metric:
   name: val_loss
   goal: minimize

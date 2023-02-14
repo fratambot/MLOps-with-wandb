@@ -1,5 +1,4 @@
 import argparse
-import json
 import os
 import subprocess
 import sys
@@ -15,28 +14,27 @@ from wandb.keras import WandbMetricsLogger
 # load env variables
 load_dotenv()
 
-# we use /app folder as base_path
+# use "*/app" folder as base_path for local imports
 base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-# and we add it at the beginning of PYTHONPATH otherwise we
-# cannot import from modules at the same level
 sys.path.insert(0, base_path)
 
 # local import
 from models.models import CNN_model  # noqa: E402
 from utils.data import datasets_loader  # noqa: E402
 
+
 default_config = SimpleNamespace(
     # hyperparams
     batch_size=32,
     lr=0.01,
-    epochs=5,
+    epochs=3,
     dropout_1=0.4,
     dropout_2=0.4,
     dense=128,
     dropout_3=0.4,
     # tuning
     tune=False,
-    max_sweep=3,
+    max_sweep=2,
     # retraining
     retrain=False,
 )
@@ -107,40 +105,46 @@ def parse_args():
 
 
 def train(config=None):
-    config_filepath = os.path.join(base_path, "config.json")
-    global LOCAL_CONFIG
-    LOCAL_CONFIG = json.load(open(config_filepath))
     wandb.login()
-    global PROJECT_NAME
-    PROJECT_NAME = os.environ.get("WANDB_PROJECT")
-    datasets = datasets_loader(LOCAL_CONFIG, PROJECT_NAME)
+    artifact_folder_path = os.path.join(base_path, "artifacts", "data")
+    artifact_name = "split-data"
+    artifact_extension = ".npz"
+    artifact_filepath = os.path.join(
+        artifact_folder_path, artifact_name + artifact_extension
+    )
+    print("data art filepath = ", artifact_filepath)
+    datasets = datasets_loader(
+        config.project, artifact_folder_path, artifact_name, artifact_filepath
+    )
     if config.retrain:
         print("Retraining an existing model")
         with wandb.init(
-            project=PROJECT_NAME,
+            project=config.project,
             job_type="retraining",
             tags=["candidate"],
             config=config,
         ) as run:
-            print("my default config in wandb = ", config)
-            model_root_dir = LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["models"][
-                "root_dir"
-            ]
-            model_filepath = LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["models"][
-                "filepath"
-            ]
-            artifact_path = os.path.join(
-                os.environ.get("WANDB_ENTITY"), os.environ.get("WANDB_MODEL_RETRAIN")
+            print("args passed = ", config)
+            artifact_folder_path = os.path.join(base_path, "artifacts", "models")
+            artifact_name = "CNN_model"
+            artifact_extension = ".h5"
+            artifact_filepath = os.path.join(
+                artifact_folder_path, artifact_name + artifact_extension
             )
-            artifact = run.use_artifact(artifact_path, type="model")
+            wandb_artifact_path = os.path.join(
+                config.entity, "model-registry", config.model_id
+            )
+
+            artifact = run.use_artifact(wandb_artifact_path, type="model")
             producer_run = artifact.logged_by()
+            # update producer_run config with passed config
             producer_run.config.update(vars(config))
+            # inject into wanb.config
             wandb.config.update(producer_run.config)
             final_config = wandb.config
-            print("final_config = ", final_config)
-            artifact.download(model_root_dir)
-            model = keras.models.load_model(model_filepath)
-            print("artifact model successfully loaded")
+            print("run config = ", final_config)
+            artifact.download(artifact_folder_path)
+            model = keras.models.load_model(artifact_filepath)
             model.fit(
                 datasets.X_train,
                 datasets.y_train,
@@ -149,37 +153,20 @@ def train(config=None):
                 validation_data=(datasets.X_val, datasets.y_val),
                 callbacks=[WandbMetricsLogger()],
             )
-            # This overwrites the local model if present
-            LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["models"] = {
-                "filename": "CNN_model"
-            }
-            model_filename = LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["models"][
-                "filename"
-            ]
-            model_root_dir = os.path.join(base_path, "artifacts/models")
-            LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["models"][
-                "root_dir"
-            ] = model_root_dir
-            model_filepath = os.path.join(model_root_dir, model_filename + ".h5")
-            LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["models"][
-                "filepath"
-            ] = model_filepath
-            model.save(model_filepath)
+            model.save(artifact_filepath)
             retrained_model_artifact = wandb.Artifact(
-                model_filename,
+                artifact_name,
                 type="model",
                 description="A simple CNN classifier for MNIST",
                 metadata=vars(config),
             )
-            retrained_model_artifact.add_file(local_path=model_filepath)
-            wandb.save(base_path=model_filepath)
+            retrained_model_artifact.add_file(local_path=artifact_filepath)
             run.log_artifact(retrained_model_artifact)
 
     else:
         with wandb.init(
-            project=PROJECT_NAME, job_type=config.job_type, config=config
+            project=config.project, job_type=config.job_type, config=config
         ) as run:
-            # good practice to inject params using sweep
             config = wandb.config
             print("Building model")
             model = CNN_model(config)
@@ -192,53 +179,41 @@ def train(config=None):
                 validation_data=(datasets.X_val, datasets.y_val),
                 callbacks=[WandbMetricsLogger()],
             )
-
-            LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["models"] = {
-                "filename": "CNN_model"
-            }
-            model_filename = LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["models"][
-                "filename"
-            ]
-            model_root_dir = os.path.join(base_path, "artifacts/models")
-            LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["models"][
-                "root_dir"
-            ] = model_root_dir
-            model_filepath = os.path.join(model_root_dir, model_filename + ".h5")
-            LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["models"][
-                "filepath"
-            ] = model_filepath
-            model.save(model_filepath)
+            artifact_folder_name = "models"
+            artifact_name = "CNN_model"
+            artifact_extension = ".h5"
+            artifact_filepath = os.path.join(
+                base_path,
+                "artifacts",
+                artifact_folder_name,
+                artifact_name + artifact_extension,
+            )
+            model.save(artifact_filepath)
             trained_model_artifact = wandb.Artifact(
-                model_filename,
+                artifact_name,
                 type="model",
                 description="A simple CNN classifier for MNIST",
                 metadata=vars(config),
             )
-            trained_model_artifact.add_file(local_path=model_filepath)
-            wandb.save(base_path=model_filepath)
+            trained_model_artifact.add_file(local_path=artifact_filepath)
             run.log_artifact(trained_model_artifact)
-
-    # save updates to LOCAL_CONFIG file
-    with open(config_filepath, "w") as f:
-        json.dump(LOCAL_CONFIG, f, indent=2)
 
     return model
 
 
 def tune(config):
     wandb.login()
-    global PROJECT_NAME
-    PROJECT_NAME = "MNIST"
     print("↑↑↑ Running sweeps in wandb...")
     with open(os.path.join(base_path, "pipelines", "sweep_config.yaml"), "r") as f:
         sweep_config = yaml.safe_load(f)
-    sweep_id = wandb.sweep(sweep=sweep_config, project=PROJECT_NAME)
-    # partial wizardry to pass a function with default configs to wandb.agent
+
+    sweep_id = wandb.sweep(sweep=sweep_config, project=config.project)
+    # functools.partial wizardry to pass a function with
+    # default configs to wandb.agent using the sdk
     train_with_config = partial(train, config=config)
     wandb.agent(sweep_id=sweep_id, function=train_with_config, count=config.max_sweep)
     print("Stopping sweep agent from CLI...")
-    entity = os.environ.get("WANDB_ENTITY")
-    run_id = os.path.join(entity, PROJECT_NAME, sweep_id)
+    run_id = os.path.join(config.entity, config.project, sweep_id)
     response = subprocess.run(
         ["wandb", "sweep", "--stop", run_id], stderr=subprocess.PIPE, text=True
     )
@@ -251,6 +226,7 @@ def only_passed_args(args):
     partial_args_dict = {}
     for tuples in partial_args_set:
         partial_args_dict[tuples[0]] = tuples[1]
+
     partial_args = argparse.Namespace(**partial_args_dict)
 
     return partial_args
@@ -262,9 +238,12 @@ if __name__ == "__main__":
     # python app/pipelines/train.py --retrain --epochs=10
 
     wandb_key = os.environ.get("WANDB_API_KEY")
-    if wandb_key is None:
+    wandb_project = os.environ.get("WANDB_PROJECT")
+    wandb_entity = os.environ.get("WANDB_ENTITY")
+    if wandb_key is None or wandb_project is None or wandb_entity is None:
         print(
-            "ERROR: Weights and Biases integration failed. You need a wandb account to run this script"  # noqa: E501
+            "ERROR: You need to set the WANDB_API_KEY, WANDB_PROJECT and"
+            "WANDB_ENTITY env variables to use this script"
         )
     else:
         args = parse_args()
@@ -273,17 +252,30 @@ if __name__ == "__main__":
             # Override default_config with args
             vars(default_config).update(vars(args))
             default_config.job_type = "tuning"
+            default_config.project = wandb_project
+            default_config.entity = wandb_entity
             tune(default_config)
         elif args.retrain:
-            # TODO: add model retrain env
-            # Use only the passed args
-            partial_args = only_passed_args(args)
-            partial_args.job_type = "retraining"
-            train(partial_args)
+            model_to_retrain = os.environ.get("WANDB_MODEL_RETRAIN")
+            if model_to_retrain is None:
+                print(
+                    "ERROR: you must set the id of the model to retrain in the"
+                    "env variable, e.g. WANDB_MODEL_RETRAIN='CNN_MNIST:v0'"
+                )
+            else:
+                # Use only the passed args
+                partial_args = only_passed_args(args)
+                partial_args.job_type = "retraining"
+                partial_args.model_id = model_to_retrain
+                partial_args.project = wandb_project
+                partial_args.entity = wandb_entity
+                train(partial_args)
         else:
             print("=== Model training pipeline ===")
             # Override default_config with args
             vars(default_config).update(vars(args))
             default_config.job_type = "training"
+            default_config.project = wandb_project
+            default_config.entity = wandb_entity
             train(default_config)
         print("=== Finished ===")

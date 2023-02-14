@@ -4,20 +4,11 @@ import wandb
 from dataclasses import dataclass
 
 
-def datasets_loader(LOCAL_CONFIG, PROJECT_NAME):
-    print("↑↑↑ Loading datasets from wandb...")
-    with wandb.init(project=PROJECT_NAME, job_type="load") as run:
-        split_data_filename = LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
-            "filename"
-        ]
-        split_data_root_dir = LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
-            "root_dir"
-        ]
-        split_data_filepath = LOCAL_CONFIG[PROJECT_NAME]["artifacts"]["split-data"][
-            "filepath"
-        ]
-        run.use_artifact(split_data_filename + ":latest").download(split_data_root_dir)
-        datasets = np.load(split_data_filepath, allow_pickle=True)
+def datasets_loader(project_name, art_folder_path, art_name, art_filepath):
+    print("↑↑↑ Loading latest datasets from wandb...")
+    with wandb.init(project=project_name, job_type="load-data") as run:
+        run.use_artifact(art_name + ":latest").download(art_folder_path)
+        datasets = np.load(art_filepath, allow_pickle=True)
         # Unzip datasets and rebuild dataclass
         datasets = DataSets(
             datasets["X_train"],
