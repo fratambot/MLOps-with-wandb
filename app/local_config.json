@@ -5,17 +5,15 @@
         "filename": "split-data",
         "root_dir": "/Users/francesco/REPOS/MLOps-with-wandb/app/artifacts/data",
         "filepath": "/Users/francesco/REPOS/MLOps-with-wandb/app/artifacts/data/split-data.npz",
-        "sample_fraction": 15,
+        "sample_fraction": 10,
         "train_val_test_size": [
           70.0,
           20.0,
           10.0
-        ]
-      },
-      "models": {
-        "filename": "CNN_model",
-        "root_dir": "/Users/francesco/REPOS/MLOps-with-wandb/app/artifacts/models",
-        "filepath": "/Users/francesco/REPOS/MLOps-with-wandb/app/artifacts/models/CNN_model.h5"
+        ],
+        "training_examples": 4899,
+        "validation_examples": 1401,
+        "test_examples": 700
       }
     }
   }
