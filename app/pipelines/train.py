@@ -25,16 +25,16 @@ from utils.data import datasets_loader  # noqa: E402
 
 default_config = SimpleNamespace(
     # hyperparams
-    batch_size=32,
+    batch_size=64,
     lr=0.01,
-    epochs=3,
-    dropout_1=0.4,
-    dropout_2=0.4,
+    epochs=5,
+    dropout_1=0.2,
+    dropout_2=0.2,
     dense=128,
-    dropout_3=0.4,
+    dropout_3=0.2,
     # tuning
     tune=False,
-    max_sweep=2,
+    max_sweep=30,
     # retraining
     retrain=False,
 )

@@ -158,7 +158,8 @@ def build_labels_df(datasets):
     frames = []
     for dataset in ["y_train", "y_val", "y_test"]:
         df = pd.DataFrame(getattr(datasets, dataset), columns=["label"])
-        df["stage"] = dataset
+        _, name = dataset.split("_", 1)
+        df["stage"] = name
         frames.append(df)
 
     labels_df = pd.concat(frames)
