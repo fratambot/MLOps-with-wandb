@@ -2,14 +2,11 @@
 Icon?
 .DS_store
 # python
-__pycache__
+__pycache__/
 .ipynb_checkpoints
 # VS Code
 *.code-workspace
-# folders and folder content
-app/artifacts/data/*
-app/artifacts/models/*
-app/artifacts/figures/*
+# folders (for app/artifacts/* we use specific .gitignore inside each subfolder)
 wandb/
 # security
 .env

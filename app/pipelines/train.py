@@ -168,6 +168,7 @@ def train(config=None):
             project=config.project, job_type=config.job_type, config=config
         ) as run:
             config = wandb.config
+            print("run config = ", config)
             print("Building model")
             model = CNN_model(config)
 
@@ -246,6 +247,7 @@ if __name__ == "__main__":
             "WANDB_ENTITY env variables to use this script"
         )
     else:
+        # TODO: build a config for env params and merge
         args = parse_args()
         if args.tune:
             print("=== Model tuning pipeline ===")

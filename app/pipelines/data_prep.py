@@ -1,5 +1,4 @@
 import argparse
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import os
@@ -19,6 +18,7 @@ sys.path.insert(0, base_path)
 
 # local imports
 from utils.data import DataSets  # noqa: E402
+from utils.plots import make_labels_histogram  # noqa: E402
 
 
 def parse_args():
@@ -85,8 +85,8 @@ def data_preparation_pipeline(args):
         )
         split_data_artifact.add_file(local_path=artifact_filepath)
         # make histogram of labels distributions for the 3 sets
-        hist_path = make_labels_histogram(datasets, args.train_val_test_size)
-        # log to wand as media...
+        hist_path = make_labels_histogram(base_path, datasets, args.train_val_test_size)
+        # log to wand as media
         run.log(
             {
                 "labels_distribution": wandb.Image(
@@ -94,12 +94,12 @@ def data_preparation_pipeline(args):
                 )
             }
         )
-        # ...but also as artifact file
-        split_data_artifact.add_file(local_path=f"{hist_path}.png")
         # create wandb table on labels
         labels_df = build_labels_df(datasets)
-        table = wandb.Table(dataframe=labels_df)
-        split_data_artifact.add(table, "split_labels")
+        split_table = wandb.Table(dataframe=labels_df)
+        # log table to wandb
+        run.log({"split_table": split_table})
+        # split_data_artifact.add(split_table, "split_labels")
         run.log_artifact(split_data_artifact)
 
     print("training examples: ", len(datasets.X_train))
@@ -167,39 +167,6 @@ def build_labels_df(datasets):
     labels_df = pd.concat(frames)
 
     return labels_df
-
-
-def make_labels_histogram(datasets, train_val_test_size):
-    split_list = list(map(float, train_val_test_size.split(" ")))
-    assert len(split_list) == 3
-    rescaled_frames = []
-    for i, dataset_name in enumerate(["train", "val", "test"]):
-        subset = getattr(datasets, "y_" + dataset_name)
-        value_counts = get_value_counts(subset, dataset_name)
-        rescaled = value_counts[dataset_name] * (100.0 / split_list[i])
-        rescaled_frames.append(rescaled)
-
-    rescaled_df = pd.concat(rescaled_frames, axis=1)
-    rescaled_df.plot(
-        kind="bar",
-        stacked=False,
-        title="Rescaled distribution of labels for the 3 datasets",
-        ylabel="Rescaled arbitrary counts",
-        ylim=(0, 1000),
-        rot=0,
-    )
-    histogram_path = os.path.join(base_path, "artifacts/figures", "labels_histogram")
-    plt.savefig(histogram_path, bbox_inches="tight", facecolor="w")
-
-    return histogram_path
-
-
-def get_value_counts(dataset, name):
-    unique, counts = np.unique(dataset, return_counts=True)
-    zipped = list(zip(unique, counts))
-    value_counts = pd.DataFrame(zipped, columns=["label", f"{name}"])
-    value_counts.set_index("label", inplace=True)
-    return value_counts
 
 
 if __name__ == "__main__":
