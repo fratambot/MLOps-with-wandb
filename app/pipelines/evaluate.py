@@ -196,7 +196,7 @@ if __name__ == "__main__":
             model_id=model_to_evaluate,
             job_type="evaluation",
         )
-        # Override default_config with args
+        # update default_config with args
         vars(config).update(vars(args))
         evaluate(config)
         print("=== Finished ===")

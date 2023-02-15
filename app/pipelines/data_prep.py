@@ -36,8 +36,6 @@ def parse_args():
 
 def data_preparation_pipeline(args):
     wandb.login()
-    # global PROJECT_NAME
-    # PROJECT_NAME = os.environ.get("WANDB_PROJECT")
     with wandb.init(project=args.project, job_type="data-split") as run:
         artifact_folder_name = "data"
         artifact_name = "split-data"
@@ -99,7 +97,6 @@ def data_preparation_pipeline(args):
         split_table = wandb.Table(dataframe=labels_df)
         # log table to wandb
         run.log({"split_table": split_table})
-        # split_data_artifact.add(split_table, "split_labels")
         run.log_artifact(split_data_artifact)
 
     print("training examples: ", len(datasets.X_train))

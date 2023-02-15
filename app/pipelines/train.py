@@ -247,15 +247,15 @@ if __name__ == "__main__":
             "WANDB_ENTITY env variables to use this script"
         )
     else:
-        # TODO: build a config for env params and merge
+        env_config = SimpleNamespace(project=wandb_project, entity=wandb_entity)
         args = parse_args()
         if args.tune:
             print("=== Model tuning pipeline ===")
-            # Override default_config with args
+            # add env_config to default_config
+            vars(default_config).update(vars(env_config))
+            # override default_config with args
             vars(default_config).update(vars(args))
             default_config.job_type = "tuning"
-            default_config.project = wandb_project
-            default_config.entity = wandb_entity
             tune(default_config)
         elif args.retrain:
             model_to_retrain = os.environ.get("WANDB_MODEL_RETRAIN")
@@ -265,19 +265,19 @@ if __name__ == "__main__":
                     "env variable, e.g. WANDB_MODEL_RETRAIN='CNN_MNIST:v0'"
                 )
             else:
-                # Use only the passed args
+                # use only the passed args
                 partial_args = only_passed_args(args)
+                # add model_id to env_config and update passed_args
+                env_config.model_id = model_to_retrain
+                vars(partial_args).update(vars(env_config))
                 partial_args.job_type = "retraining"
-                partial_args.model_id = model_to_retrain
-                partial_args.project = wandb_project
-                partial_args.entity = wandb_entity
                 train(partial_args)
         else:
             print("=== Model training pipeline ===")
-            # Override default_config with args
+            # add env_config to default_config
+            vars(default_config).update(vars(env_config))
+            # override default_config with args
             vars(default_config).update(vars(args))
             default_config.job_type = "training"
-            default_config.project = wandb_project
-            default_config.entity = wandb_entity
             train(default_config)
         print("=== Finished ===")
