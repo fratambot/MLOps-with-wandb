@@ -27,8 +27,18 @@ def parse_args():
         description=docstring,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--fraction", default=10, type=int)
-    parser.add_argument("--train_val_test_size", nargs="+", default="70 20 10")
+    parser.add_argument(
+        "--fraction",
+        default=10,
+        type=int,
+        help="keras MNIST dataset fraction in %% to use",
+    )
+    parser.add_argument(
+        "--train_val_test_size",
+        nargs="+",
+        default="70 20 10",
+        help="split between train / val / test in %%",
+    )
     args = parser.parse_args()
 
     return args
@@ -174,7 +184,7 @@ if __name__ == "__main__":
     wandb_project = os.environ.get("WANDB_PROJECT")
     if wandb_key is None or wandb_project is None:
         print(
-            "ERROR: You need to set the WANDB_API_KEY and"
+            "ERROR: You need to set the WANDB_API_KEY and "
             "WANDB_PROJECT env variables to use this script"
         )
     else:
