@@ -25,9 +25,17 @@ Thanks to wandb you **and your team** have:
   - perform error analysis
 - the capability to write and share markdown reports directly linked to your tables or other artifacts you logged to wandb
 
-## Requirements
-- A [wandb account](https://wandb.ai/site/pricing). It's free for personal use and you have unlimited tracking and 100GB storage for artifacts.
-- You have to create a `.env` file in the `app/` folder (which is git-ignored) containing your wandb API key and other information depending on the script you're using (more information later). It would look like:
+## Requirements & Installation
+- You need to have a [wandb account](https://wandb.ai/site/pricing). It's free for personal use and you have unlimited tracking and 100GB storage for artifacts.
+- clone the repository and [create a virtual environment from the given yaml file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file) with the required packages :
+```
+conda env create -f environment.yaml
+```
+- activate the environment:
+```
+conda activate MLOps-with-wandb
+```
+- Create a `.env` file in the `app/` folder (which is git-ignored) containing your [wandb API key](https://wandb.ai/authorize) and other information depending on the script you're using (more information later). The file would look like:
 ```
 WANDB_API_KEY="********************************"
 WANDB_ENTITY="fratambot"
@@ -36,13 +44,18 @@ WANDB_MODEL_RETRAIN="CNN_MNIST:v0"
 WANDB_MODEL_EVAL="CNN_MNIST:v1"
 ```
 
-## Install
-- Clone the repository and [create a virtual environment from yaml](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file) with the required packages :
+## Data Preparation & Baseline model
+
+To prepare your datasets you can run the `app/pipelines/data-prep.py` script: it will sample 10% of the keras MNIST dataset and split it into 70 % training / 20% validation / 10% test with stratification over the classes.
+
+You can change these default values by passing them. For more info consult:
 ```
-conda env create -f environment.yml
+python app/pipelines/data-prep.py --help
 ```
-- Activate the environment:
-```
-conda activate MLOps-with-wandb
-```
+- **inputs: None**
+- **outputs:**
+  - media: an histogram showing the labels distribnution for the 3 datasets (rescaled wrt the relative split proportion)
+  - table: a wandb table
+  - artifact: npz
+
 
