@@ -1,13 +1,5 @@
-import os
-import sys
 import tensorflow as tf
 import tensorflow.keras.layers as tfl
-
-# we use /app folder as base_path
-base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-# and we add it at the beginning of PYTHONPATH otherwise we
-# cannot import from modules at the same level
-sys.path.insert(0, base_path)
 
 
 def CNN_model(config):

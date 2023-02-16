@@ -113,7 +113,6 @@ def train(config=None):
     artifact_filepath = os.path.join(
         artifact_folder_path, artifact_name + artifact_extension
     )
-    print("data art filepath = ", artifact_filepath)
     datasets = datasets_loader(
         config.project, artifact_folder_path, artifact_name, artifact_filepath
     )
