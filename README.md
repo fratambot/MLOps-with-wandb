@@ -17,7 +17,7 @@ The project consists of 3 python scripts living inside the `app/pipelines` folde
 
 Thanks to wandb you **and your team** have:
 - version control and lineage of your [datasets and models](https://docs.wandb.ai/guides/artifacts)
-- [experiment tracking](https://docs.wandb.ai/guides/track) by logging almost everything your heart desires
+- [experiment tracking](https://docs.wandb.ai/guides/track) by logging almost everything your heart desires and thanks to the [model registry](https://docs.wandb.ai/guides/models/walkthrough) which helps transitioning models over lifecycle and allows to easily hands off models to your team
 - a very powerful, framework agnostic and easy-to-use tool for [hyperparameters tuning](https://docs.wandb.ai/guides/sweeps) (goodbye keras-tuner my old friend)
 - [tables](https://docs.wandb.ai/guides/data-vis/tables-quickstart) on data and run results which allow you to:
   - study input distributions and avoid data leakage
@@ -39,8 +39,8 @@ conda activate MLOps-with-wandb
 WANDB_API_KEY="********************************"
 WANDB_ENTITY="fratambot"
 WANDB_PROJECT="MNIST"
-WANDB_MODEL_RETRAIN="CNN_MNIST:v0"
-WANDB_MODEL_EVAL="CNN_MNIST:v1"
+WANDB_MODEL_RETRAIN="MNIST_CNN:v0"
+WANDB_MODEL_EVAL="MNIST_CNN:v1"
 ```
 
 ## Data Preparation & Baseline model
@@ -123,13 +123,13 @@ Your observations and insights on the hyperparameters tuning step can be shared 
 
 Once you have found a candidate model with the best combination of hyperparameters values you should probably retrain it on more epochs before evaluating it. For this task you'll use the `train.py` script with the boolean `--retrain` flag. The model and its hyperparameters values will be loaded from wandb and **you shouldn't change them !**.
 ```
-python app/pipelines/train.py --retrain --epochs=10
+python app/pipelines/train.py --retrain --epochs=15
 ```
 - **requirements**:
   - `WANDB_API_KEY`
   - `WANDB_PROJECT`
   - `WANDB_ENTITY`
-  - **`WANDB_MODEL_RETRAIN`** (you can find the candidate model id in the model registry. See at the end of the previous video)
+  - **`WANDB_MODEL_RETRAIN`** (you can find the "candidate" model id in the model registry. See at the end of the previous video)
 - **inputs:**
   - artifact: the latest version of `split-data.npz`
   - artifact: the model you tagged as "candidate" in your model registry (e.g. `WANDB_MODEL_RETRAIN="MNIST_CNN:v0"`)
@@ -137,7 +137,39 @@ python app/pipelines/train.py --retrain --epochs=10
   - artifact: a retrained version of your candidate model in a file called `CNN_model.h5`
   - metrics: automagically logged using wandb [keras callback](https://docs.wandb.ai/guides/integrations/keras)
 
+If your model doesn't overfit you can tag it as "to_evaluate" in your model registry for the next step :
 
+https://user-images.githubusercontent.com/20300069/219394058-40926977-0d20-4c63-a957-3b4cac5d2560.mov
 
+<br/>
+
+## Evaluation
+
+Now that you have retrained your candidate model for more epochs it's time to evaluate it. For this task you'll use the `evaluate.py` script.
+The valuation will be performed on the validation set (again) and on the test set that your model have never seen before. For this task a table with images generated from the numpy arrays examples (`X_val` and `X_test`) wil be built. This operation might take a while depending on the size of your validation and test size (if you kept the default parameters in `data_prep.py`, there will be 1401 validation examples and 700 test examples to convert into images and it will take ~15MB of hard disk and wandb storage space). You can decide to not generate the examples images using the boolean `--no-generate_images` flag:
+```
+python app/pipelines/evaluate.py --no-generate-images
+```
+But it is **strongly suggested to run the script without flags** and generate the images because they can be really useful for error analysis.
+
+- **requirements**:
+  - `WANDB_API_KEY`
+  - `WANDB_PROJECT`
+  - `WANDB_ENTITY`
+  - **`WANDB_MODEL_EVAL`** (you can find the model id "to_evaluate" in the model registry. See at the end of the previous video)
+- **inputs:**
+  - artifact: the latest version of `split-data.npz`
+  - artifact: the model you tagged as "to_evaluate" in your model registry (e.g. `WANDB_MODEL_RETRAIN="MNIST_CNN:v0"`)
+- **outputs:**
+  - metrics: loss and categorical accuracy for both the validation and test set
+  - media: confusion matrices for both the validation and test sets
+  - table: a 3 columns table with the MNIST image of the example, the true label and the predicted label for both the validation and test set
   
+This is how it looks like in the UI:
+  
+https://user-images.githubusercontent.com/20300069/219407381-aa4979c2-f08b-4d95-9dcf-595a420958b5.mov
+
+<br/>
+
+And, as usual, you can write and share a [detailed report](https://api.wandb.ai/links/fratambot/we8lsjrj) for the production team
   
