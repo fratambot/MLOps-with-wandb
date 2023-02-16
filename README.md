@@ -1,9 +1,8 @@
 # MLOps with Weights & Biases
 
 
-<p align="center">
-  <img width="800" src="/README/wandb_logo.png">
-</p>
+![wandb_logo](https://user-images.githubusercontent.com/20300069/219328542-b5ff6cbe-5082-4e0e-bf3d-96db3b30b90e.png)
+
 
 This toy-keras-project (MNIST classification with CNNs) showcases [Weights & Biases](https://wandb.ai/site) capabilities to easily achieve some level of MLOps in your ML projects. Wandb UI is a powerful tool and you're going to go back to it while iterating over the typical ML lifecycle of your project, as described below.
 
@@ -57,5 +56,10 @@ python app/pipelines/data-prep.py --help
   - media: an histogram showing the labels distribnution for the 3 datasets (rescaled wrt the relative split proportion)
   - table: a wandb table
   - artifact: npz
+
+This is waht you'll find on wandb and how to interact with it through the UI:
+
+https://user-images.githubusercontent.com/20300069/219327479-93d57c9c-4759-4b2a-b0b3-02e963b58619.mov
+
 
 
