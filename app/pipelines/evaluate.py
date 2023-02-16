@@ -176,7 +176,6 @@ if __name__ == "__main__":
     wandb_project = os.environ.get("WANDB_PROJECT")
     wandb_entity = os.environ.get("WANDB_ENTITY")
     model_to_evaluate = os.environ.get("WANDB_MODEL_EVAL")
-    # TODO: add model_eval env
     if (
         wandb_key is None
         or wandb_project is None
@@ -184,7 +183,7 @@ if __name__ == "__main__":
         or model_to_evaluate is None
     ):
         print(
-            "ERROR: You need to set the WANDB_API_KEY, WANDB_PROJECT,"
+            "ERROR: You need to set the WANDB_API_KEY, WANDB_PROJECT, "
             "WANDB_ENTITY as well as WANDB_MODEL_EVAL env variables to use this script"
         )
     else:

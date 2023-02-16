@@ -98,7 +98,8 @@ def parse_args():
         "--retrain",
         default=default_config.retrain,
         action=argparse.BooleanOptionalAction,
-        help="run hyperparameters tuning on wandb",
+        help="retrain an existing model. It requires the "
+        "WANDB_MODEL_RETRAIN env variable",
     )
     args = parser.parse_args()
     return args
@@ -158,7 +159,7 @@ def train(config=None):
                 artifact_name,
                 type="model",
                 description="A simple CNN classifier for MNIST",
-                metadata=vars(config),
+                metadata=vars(final_config),
             )
             retrained_model_artifact.add_file(local_path=artifact_filepath)
             run.log_artifact(retrained_model_artifact)
@@ -243,7 +244,7 @@ if __name__ == "__main__":
     wandb_entity = os.environ.get("WANDB_ENTITY")
     if wandb_key is None or wandb_project is None or wandb_entity is None:
         print(
-            "ERROR: You need to set the WANDB_API_KEY, WANDB_PROJECT and"
+            "ERROR: You need to set the WANDB_API_KEY, WANDB_PROJECT and "
             "WANDB_ENTITY env variables to use this script"
         )
     else:
