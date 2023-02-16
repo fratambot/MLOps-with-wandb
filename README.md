@@ -13,7 +13,8 @@ The project consists of 3 python scripts living inside the `app/pipelines` folde
 - perform hyperparameters tuning (directly in wandb using sweeps)
 - retrain your candidate model
 - evaluate your final model before moving it to production
-These steps should be performed in this order, at least the first time.
+
+**These steps should be executed in this order, at least the first time.**
 
 Thanks to wandb you **and your team** have:
 - version control and lineage of your datasets and models
@@ -36,12 +37,12 @@ WANDB_MODEL_EVAL="CNN_MNIST:v1"
 ```
 
 ## Install
-- Clone the repository, create a virtual environment with **python 3.9** and activate it e.g. :
+- Clone the repository and [create a virtual environment from yaml](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file) with the required packages :
 ```
-conda create --name MLOps-with-wandb python==3.9
+conda env create -f environment.yml
+```
+- Activate the environment:
+```
 conda activate MLOps-with-wandb
 ```
-- Install the required packages:
-```
-conda ...
-```
+
