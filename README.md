@@ -4,9 +4,9 @@
 ![wandb_logo](https://user-images.githubusercontent.com/20300069/219328542-b5ff6cbe-5082-4e0e-bf3d-96db3b30b90e.png)
 
 
-This toy-keras-project (MNIST classification with CNNs) showcases [Weights & Biases](https://wandb.ai/site) capabilities to easily achieve some level of MLOps in your ML projects. Wandb UI is a powerful tool and you're going to go back to it while iterating over the typical ML lifecycle of your project, as described below.
+This toy-keras-project (MNIST classification with CNNs) showcases [Weights & Biases](https://wandb.ai/site) capabilities to easily achieve some level of MLOps in your ML projects. Wandb UI is a powerful tool and you're going to use it while iterate over your model development lifecycle and important passages will be shown below as videos.
 
-The project consists of 3 python scripts living inside the `app/pipelines` folder: `data_prep.py`, `train.py` and `evaluate.py` which allows you to:
+You have 3 python scripts living inside the `app/pipelines` folder: `data_prep.py`, `train.py` and `evaluate.py` which allows you to:
 - prepare your training, validation and test datasets
 - train a baseline model
 - perform hyperparameters tuning (directly in wandb using sweeps)
@@ -17,7 +17,7 @@ The project consists of 3 python scripts living inside the `app/pipelines` folde
 
 Thanks to wandb you **and your team** have:
 - version control and lineage of your [datasets and models](https://docs.wandb.ai/guides/artifacts)
-- [experiment tracking](https://docs.wandb.ai/guides/track) by logging almost everything your heart desires and thanks to the [model registry](https://docs.wandb.ai/guides/models/walkthrough) which helps transitioning models over lifecycle and allows to easily hands off models to your team
+- [experiment tracking](https://docs.wandb.ai/guides/track) by logging almost everything your heart desires and thanks to the [model registry](https://docs.wandb.ai/guides/models/walkthrough) you can easily transition models over lifecycle and hands off models to your teammates
 - a very powerful, framework agnostic and easy-to-use tool for [hyperparameters tuning](https://docs.wandb.ai/guides/sweeps) (goodbye keras-tuner my old friend)
 - [tables](https://docs.wandb.ai/guides/data-vis/tables-quickstart) on data and run results which allow you to:
   - study input distributions and avoid data leakage
@@ -26,7 +26,7 @@ Thanks to wandb you **and your team** have:
 
 ## Requirements & Installation
 - You need to have a [wandb account](https://wandb.ai/site/pricing). It's free for personal use and you have unlimited tracking and 100GB storage for artifacts.
-- clone the repository and [create a virtual environment from the given yaml file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file) with the required packages :
+- clone the repository and [create a virtual environment from the given yaml file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file). All the required packages will be installed as well :
 ```
 conda env create -f environment.yaml
 ```
@@ -34,7 +34,7 @@ conda env create -f environment.yaml
 ```
 conda activate MLOps-with-wandb
 ```
-- Create a `.env` file in the `app/` folder (which is git-ignored) containing your [wandb API key](https://wandb.ai/authorize) and other information depending on the script you're using (more information later). The file would look like:
+- Create a `.env` file (which is git-ignored) in the `app/` folder containing your [wandb API key](https://wandb.ai/authorize) and other information depending on the script you're using (more information later). The file would look like:
 ```
 WANDB_API_KEY="********************************"
 WANDB_ENTITY="fratambot"
@@ -57,7 +57,7 @@ python app/pipelines/data-prep.py --help
 - **inputs:** None
 - **outputs:**
   - artifact: a training / validation / test dataset collection in a file called `split-data.npz` 
-  - media: an histogram showing the labels distribution for the 3 datasets (rescaled wrt the relative split proportion)
+  - media: an histogram showing the labels distribution for the 3 datasets (rescaled with respect to the relative split proportion)
   - table: a wandb table
   
 This is what you'll find on wandb and how to interact with it through the UI:
@@ -86,7 +86,7 @@ https://user-images.githubusercontent.com/20300069/219338386-05e9d1de-ac1b-4c6f-
 
 <br/>
 
-At the end you can create and **[share a nice report](https://wandb.ai/fratambot/MNIST/reports/Data-preparation-Baseline-model--VmlldzozNTcwODg3)** with your findings and insights for your team.
+At the end you can create and [share a nice report](https://wandb.ai/fratambot/MNIST/reports/Data-preparation-Baseline-model--VmlldzozNTcwODg3) with your findings and insights for your team.
 
 
 ## Hyperparameters tuning
@@ -96,7 +96,7 @@ For that you will run the training script with the boolean `--tune` flag:
 ```
 python app/pipelines/train.py --tune
 ```
-The script will create a wandb.agent using Bayesian search with a default value of `max_sweep=30` runs to try over a set of hyperparameters choises defined in the `sweep.yaml` living in the `app/pipelines` folder. You can change the [sweep configuration](https://docs.wandb.ai/guides/sweeps/define-sweep-configuration) according to your preferences and adjust `--max_sweep`, `--epochs` and other performance parameters according to your infrastructure and resources.
+The script will create a wandb agent performing a Bayesian search with a default value of `max_sweep=30` runs over a set of hyperparameters choices defined in the `sweep.yaml` living in the `app/pipelines` folder. You can change the [sweep configuration](https://docs.wandb.ai/guides/sweeps/define-sweep-configuration) according to your preferences and adjust `--max_sweep`, `--epochs` and other performance parameters according to your infrastructure and resources.
 
 - **requirements**:
   - `WANDB_API_KEY`
@@ -117,11 +117,11 @@ https://user-images.githubusercontent.com/20300069/219373521-97141c69-196c-43af-
 
 <br/>
 
-Your observations and insights on the hyperparameters tuning step can be shared with your team in a **[nice report](https://wandb.ai/fratambot/MNIST/reports/Hyperparams-tuning--VmlldzozNTcyMzMw)**.
+Your observations and insights on the hyperparameters tuning step can be shared with your team in a [report](https://wandb.ai/fratambot/MNIST/reports/Hyperparams-tuning--VmlldzozNTcyMzMw) linked to your sweep runs for further investigation.
 
 ## Retraining
 
-Once you have found a candidate model with the best combination of hyperparameters values you should probably retrain it on more epochs before evaluating it. For this task you'll use the `train.py` script with the boolean `--retrain` flag. The model and its hyperparameters values will be loaded from wandb and **you shouldn't change them !**.
+Once you have found a candidate model with the best combination of hyperparameters values you should probably retrain it on more epochs before evaluating it. For this task you'll use the `train.py` script with the boolean `--retrain` flag. The model and its hyperparameters values will be loaded from wandb and **you should NOT change them !**
 ```
 python app/pipelines/train.py --retrain --epochs=15
 ```
@@ -145,8 +145,8 @@ https://user-images.githubusercontent.com/20300069/219394058-40926977-0d20-4c63-
 
 ## Evaluation
 
-Now that you have retrained your candidate model for more epochs it's time to evaluate it. For this task you'll use the `evaluate.py` script.
-The valuation will be performed on the validation set (again) and on the test set that your model has never seen before. For this task a table with images generated from the numpy arrays examples (`X_val` and `X_test`) wil be built. This operation might take a while depending on the size of your validation and test size (if you kept the default parameters in `data_prep.py`, there will be 1401 validation examples and 700 test examples to convert into images and it will take ~15MB of hard disk and wandb storage space). You can decide to not generate the examples images using the boolean `--no-generate_images` flag:
+Now that you have retrained your candidate model for more epochs it's time to evaluate it. For this task you'll use the `app/pipelines/evaluate.py` script.
+The evaluation will be performed on the validation set (again) and on the test set that your model has never seen before. For this task a table with images generated from the numpy arrays examples (`X_val` and `X_test`) wil be built. This operation might take a while depending on the size of your validation and test size (if you kept the default parameters in `data_prep.py`, there will be 1401 validation examples and 700 test examples to convert into images and it will take ~17MB of hard disk and wandb storage space). You can decide to not generate the examples images using the boolean `--no-generate_images` flag:
 ```
 python app/pipelines/evaluate.py --no-generate-images
 ```
@@ -159,7 +159,7 @@ But it is **strongly suggested to run the script without flags** and generate th
   - **`WANDB_MODEL_EVAL`** (you can find the model id "to_evaluate" in the model registry. See at the end of the previous video)
 - **inputs:**
   - artifact: the latest version of `split-data.npz`
-  - artifact: the model you tagged as "to_evaluate" in your model registry (e.g. `WANDB_MODEL_RETRAIN="MNIST_CNN:v0"`)
+  - artifact: the model you tagged as "to_evaluate" in your model registry (e.g. `WANDB_MODEL_RETRAIN="MNIST_CNN:v1"`)
 - **outputs:**
   - metrics: loss and categorical accuracy for both the validation and test set
   - media: confusion matrices for both the validation and test sets
@@ -177,7 +177,7 @@ And, as usual, you can write and share a [detailed report](https://api.wandb.ai/
 
 If you want to learn more on Weights & Biases, you can start with:
 
-- the W&B [documentation](https://docs.wandb.ai/) which is very rich and points you to examples on github and colab
-- the "Effective MLOps: model development" [course](https://www.wandb.courses/courses/effective-mlops-model-development) by W&B
-- the W&B [blog](https://wandb.ai/fully-connected) "Fully connected"
-- the W&B [white paper](https://wandb.ai/site/holistic-mlops-whitepaper-download) "MLOps: a holistic approach"
+- the wandb [documentation](https://docs.wandb.ai/) which is very rich and points you to examples on github and colab
+- the "Effective MLOps: model development" [course](https://www.wandb.courses/courses/effective-mlops-model-development) by wandb
+- the wandb [blog](https://wandb.ai/fully-connected) "Fully connected"
+- the wandb [white paper](https://wandb.ai/site/holistic-mlops-whitepaper-download) "MLOps: a holistic approach"
