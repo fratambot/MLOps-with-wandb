@@ -59,7 +59,7 @@ python app/pipelines/data-prep.py --help
 - **outputs:**
   - artifact: a training / validation / test dataset collection in a file called `split-data.npz` 
   - media: an histogram showing the labels distribution for the 3 datasets (rescaled with respect to the relative split proportion)
-  - table: a wandb table
+  - table: a 2 columns table with the label and the stage (training / validation / test set)
   
 This is what you'll find on wandb and how to interact with it through the UI:
 
