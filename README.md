@@ -26,6 +26,7 @@ Thanks to wandb, you **and your team** have:
 
 ## Requirements & Installation
 - You need to have a [wandb account](https://wandb.ai/site/pricing). It's free for personal use and you have unlimited tracking and 100GB storage for artifacts.
+- create a private or open project and give it a name, e.g. "MNIST"
 - clone the repository and [create a virtual environment from the given yaml file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file). All the required packages will be installed as well :
 ```
 conda env create -f environment.yaml
