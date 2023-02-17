@@ -180,6 +180,6 @@ And, as usual, you can write and share a [detailed report](https://api.wandb.ai/
 If you want to learn more on Weights & Biases, here are some extra resources:
 
 - the wandb [documentation](https://docs.wandb.ai/) which is very rich and points you to examples on github and colab
-- the "Effective MLOps: model development" [course](https://www.wandb.courses/courses/effective-mlops-model-development) by wandb
+- the **free** "Effective MLOps: model development" [course](https://www.wandb.courses/courses/effective-mlops-model-development) by wandb
 - the wandb [blog](https://wandb.ai/fully-connected) "Fully connected"
 - the wandb [white paper](https://wandb.ai/site/holistic-mlops-whitepaper-download) "MLOps: a holistic approach"
