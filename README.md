@@ -4,9 +4,9 @@
 ![wandb_logo](https://user-images.githubusercontent.com/20300069/219328542-b5ff6cbe-5082-4e0e-bf3d-96db3b30b90e.png)
 
 
-This toy-keras-project (MNIST classification with CNNs) showcases [Weights & Biases](https://wandb.ai/site) capabilities to easily achieve some level of MLOps in your ML projects. Wandb UI is a powerful tool and you're going to use it while iterate over your model development lifecycle and important passages will be shown below as videos.
+This toy-keras-project (MNIST classification with CNNs, duh) showcases [Weights & Biases](https://wandb.ai/site) capabilities to easily achieve complete MLOps maturity for experimentation and model development in your ML projects. Wandb UI is a powerful tool and you're going to use it while iterate over your model development lifecycle and important passages will be shown below in videos.
 
-You have 3 python scripts living inside the `app/pipelines` folder: `data_prep.py`, `train.py` and `evaluate.py` which allows you to:
+In this project you have 3 python scripts living inside the `app/pipelines` folder: `data_prep.py`, `train.py` and `evaluate.py` which allows you to:
 - prepare your training, validation and test datasets
 - train a baseline model
 - perform hyperparameters tuning (directly in wandb using sweeps)
@@ -17,9 +17,9 @@ You have 3 python scripts living inside the `app/pipelines` folder: `data_prep.p
 
 Thanks to wandb you **and your team** have:
 - version control and lineage of your [datasets and models](https://docs.wandb.ai/guides/artifacts)
-- [experiment tracking](https://docs.wandb.ai/guides/track) by logging almost everything your heart desires and thanks to the [model registry](https://docs.wandb.ai/guides/models/walkthrough) you can easily transition models over lifecycle and hands off models to your teammates
+- [experiment tracking](https://docs.wandb.ai/guides/track) by logging almost everything your ❤ desires and thanks to the [model registry](https://docs.wandb.ai/guides/models/walkthrough) you can effortlessly transition models over lifecycle and easily hands off models to your teammates
 - a very powerful, framework agnostic and easy-to-use tool for [hyperparameters tuning](https://docs.wandb.ai/guides/sweeps) (goodbye keras-tuner my old friend)
-- [tables](https://docs.wandb.ai/guides/data-vis/tables-quickstart) on data and run results which allow you to:
+- [tables](https://docs.wandb.ai/guides/data-vis/tables-quickstart) to log almost any type of data which allow you to:
   - study input distributions and avoid data leakage
   - perform error analysis
 - the capability to write and share markdown [reports](https://docs.wandb.ai/guides/reports) directly linked to your tables or other artifacts you logged to wandb
@@ -96,7 +96,7 @@ For that you will run the training script with the boolean `--tune` flag:
 ```
 python app/pipelines/train.py --tune
 ```
-The script will create a wandb agent performing a Bayesian search with a default value of `max_sweep=30` runs over a set of hyperparameters choices defined in the `sweep.yaml` living in the `app/pipelines` folder. You can change the [sweep configuration](https://docs.wandb.ai/guides/sweeps/define-sweep-configuration) according to your preferences and adjust `--max_sweep`, `--epochs` and other performance parameters according to your infrastructure and resources.
+The script will create a wandb agent performing a Bayesian search with a default value (`max_sweep=30`) of 30 runs at most over a set of hyperparameters choices defined in the `sweep.yaml` file living in the `app/pipelines` folder. You can change the [sweep configuration](https://docs.wandb.ai/guides/sweeps/define-sweep-configuration) according to your preferences and adjust `--max_sweep`, `--epochs` and other performance parameters according to your infrastructure, time and resources.
 
 - **requirements**:
   - `WANDB_API_KEY`
@@ -146,11 +146,13 @@ https://user-images.githubusercontent.com/20300069/219394058-40926977-0d20-4c63-
 ## Evaluation
 
 Now that you have retrained your candidate model for more epochs it's time to evaluate it. For this task you'll use the `app/pipelines/evaluate.py` script.
-The evaluation will be performed on the validation set (again) and on the test set that your model has never seen before. For this task a table with images generated from the numpy arrays examples (`X_val` and `X_test`) wil be built. This operation might take a while depending on the size of your validation and test size (if you kept the default parameters in `data_prep.py`, there will be 1401 validation examples and 700 test examples to convert into images and it will take ~17MB of hard disk and wandb storage space). You can decide to not generate the examples images using the boolean `--no-generate_images` flag:
+The evaluation will be performed on the validation set (again) and on the test set that your model has never seen before. The comparison  allows to estimate the degree of overfit to the validation set, if present.
+
+For this task a table with images generated from the numpy arrays examples (`X_val` and `X_test`) wil be built. This operation might take a while depending on the size of your validation and test size (if you kept the default parameters in `data_prep.py`, there will be 1401 validation examples and 700 test examples to convert into images and it will take ~17MB of hard disk and wandb storage space). You can decide to not generate the examples images using the boolean `--no-generate_images` flag:
 ```
 python app/pipelines/evaluate.py --no-generate-images
 ```
-But it is **strongly suggested to run the script without flags** and generate the images because they can be really useful for error analysis.
+But it is **strongly suggested to run the script without flags**, grab a cup of ☕ and generate the images because they can be really useful for error analysis.
 
 - **requirements**:
   - `WANDB_API_KEY`
@@ -175,7 +177,7 @@ And, as usual, you can write and share a [detailed report](https://api.wandb.ai/
   
 ## Extra resources
 
-If you want to learn more on Weights & Biases, you can start with:
+If you want to learn more on Weights & Biases, here are some extra resources:
 
 - the wandb [documentation](https://docs.wandb.ai/) which is very rich and points you to examples on github and colab
 - the "Effective MLOps: model development" [course](https://www.wandb.courses/courses/effective-mlops-model-development) by wandb
