@@ -17,7 +17,7 @@ In this project you have 3 python scripts living inside the `app/pipelines` fold
 
 Thanks to wandb, you **and your team** have:
 - version control and lineage of your [datasets and models](https://docs.wandb.ai/guides/artifacts)
-- [experiment tracking](https://docs.wandb.ai/guides/track) by logging almost everything your ❤ desires and thanks to the [model registry](https://docs.wandb.ai/guides/models/walkthrough) you can effortlessly transition models over lifecycle and easily hands off models to your teammates
+- [experiment tracking](https://docs.wandb.ai/guides/track) by logging almost everything your ❤ desires and thanks to the [model registry](https://docs.wandb.ai/guides/models/walkthrough) you can effortlessly transition models over lifecycle and easily hand off models to your teammates
 - a very powerful, framework-agnostic and easy-to-use tool for [hyperparameters tuning](https://docs.wandb.ai/guides/sweeps) (goodbye keras-tuner my old friend)
 - [tables](https://docs.wandb.ai/guides/data-vis/tables-quickstart) to log almost any type of data which allow you to:
   - study input distributions and avoid data leakage
